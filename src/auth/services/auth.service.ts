@@ -1,4 +1,4 @@
-import type { User, LoginPayload, RegisterPayload } from '../types';
+import type { User, LoginPayload, RegisterPayload, UpdateProfilePayload } from '../types';
 
 const BASE_URL = 'https://api.luanmarcosdev.com.br/api';
 
@@ -35,8 +35,18 @@ export async function registerRequest(payload: RegisterPayload): Promise<void> {
 }
 
 export async function getProfileRequest(token: string): Promise<User> {
-  const res = await fetch(`${BASE_URL}/user`, {
+  const res = await fetch(`${BASE_URL}/users/me`, {
     headers: { Authorization: `Bearer ${token}` },
+  });
+  const body = await handleResponse<{ data: User }>(res);
+  return body.data;
+}
+
+export async function updateProfileRequest(token: string, payload: UpdateProfilePayload): Promise<User> {
+  const res = await fetch(`${BASE_URL}/users/me`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify(payload),
   });
   const body = await handleResponse<{ data: User }>(res);
   return body.data;

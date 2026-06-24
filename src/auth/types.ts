@@ -23,11 +23,19 @@ export type RegisterPayload = {
   salary?: number;
 };
 
+export type UpdateProfilePayload = {
+  name?: string;
+  salary?: number | null;
+  password?: string;
+};
+
 export type AuthContextValue = {
   user: User | null;
   token: string | null;
+  loading: boolean;
   isAuthenticated: boolean;
   login: (payload: LoginPayload) => Promise<void>;
   register: (payload: RegisterPayload) => Promise<void>;
   logout: () => void;
+  updateProfile: (payload: UpdateProfilePayload) => Promise<void>;
 };

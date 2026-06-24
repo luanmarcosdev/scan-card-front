@@ -38,14 +38,4 @@ export const navData = [
   //   path: '/blog',
   //   icon: icon('ic-blog'),
   // },
-  {
-    title: 'Login',
-    path: '/sign-in',
-    icon: icon('ic-lock'),
-  },
-  {
-    title: 'Pagina não encontrada',
-    path: '/404',
-    icon: icon('ic-disabled'),
-  },
 ];

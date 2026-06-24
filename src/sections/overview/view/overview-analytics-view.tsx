@@ -2,6 +2,7 @@ import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
 
 import { _posts } from 'src/_mock';
+import { useAuth } from 'src/auth';
 import { DashboardContent } from 'src/layouts/dashboard';
 
 import { AnalyticsNews } from '../analytics-news';
@@ -11,10 +12,12 @@ import { AnalyticsWebsiteVisits } from '../analytics-website-visits';
 // ----------------------------------------------------------------------
 
 export function OverviewAnalyticsView() {
+  const { user } = useAuth();
+
   return (
     <DashboardContent maxWidth="xl">
       <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
-        Olá, Luan
+        Olá, {user?.name}
       </Typography>
 
       <Grid container spacing={3}>
@@ -129,7 +132,7 @@ export function OverviewAnalyticsView() {
           />
         </Grid> */}
 
-        <Grid size={{ xs: 12, md: 12, lg: 8 }}>
+        <Grid size={{ xs: 12 }}>
           <AnalyticsNews title="Destaques" list={_posts.slice(0, 5)} />
         </Grid>
 

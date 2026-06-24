@@ -1,9 +1,14 @@
 import { useNavigate } from 'react-router-dom';
 import { useMemo, useState, useEffect, useContext, useCallback, createContext } from 'react';
 
-import { loginRequest, registerRequest, getProfileRequest } from '../services/auth.service';
+import {
+  loginRequest,
+  registerRequest,
+  getProfileRequest,
+  updateProfileRequest,
+} from '../services/auth.service';
 
-import type { User, LoginPayload, RegisterPayload, AuthContextValue } from '../types';
+import type { User, LoginPayload, RegisterPayload, AuthContextValue, UpdateProfilePayload } from '../types';
 
 // ----------------------------------------------------------------------
 
@@ -16,10 +21,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const [token, setToken] = useState<string | null>(null);
   const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (!stored) return;
+    if (!stored) {
+      setLoading(false);
+      return;
+    }
 
     getProfileRequest(stored)
       .then((profile) => {
@@ -28,6 +37,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       })
       .catch(() => {
         localStorage.removeItem(STORAGE_KEY);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   }, []);
 
@@ -65,16 +77,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     navigate('/sign-in');
   }, [navigate]);
 
+  const updateProfile = useCallback(
+    async (payload: UpdateProfilePayload) => {
+      const updated = await updateProfileRequest(token!, payload);
+      setUser(updated);
+    },
+    [token]
+  );
+
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
       token,
+      loading,
       isAuthenticated: !!token,
       login,
       register,
       logout,
+      updateProfile,
     }),
-    [user, token, login, register, logout]
+    [user, token, loading, login, register, logout, updateProfile]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
