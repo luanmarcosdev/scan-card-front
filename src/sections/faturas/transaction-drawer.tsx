@@ -46,7 +46,9 @@ const MONTH_NAMES = [
 const HEAD_LABEL = [
   { id: 'merchant', label: 'Estabelecimento' },
   { id: 'expense_category_id', label: 'Categoria' },
-  { id: 'total_value', label: 'Valor' },
+  { id: 'total_value', label: 'Total' },
+  { id: 'parcels', label: 'Parcela' },
+  { id: 'parcel_value', label: 'Vlr. Parcela' },
   { id: 'transaction_date', label: 'Data' },
   { id: '' },
 ];

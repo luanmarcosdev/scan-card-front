@@ -46,6 +46,12 @@ export function TransactionTableRow({ row, categories, onEdit, onDelete }: Trans
 
         <TableCell>{fCurrency(row.total_value)}</TableCell>
 
+        <TableCell>
+          {row.parcels > 1 ? `${row.current_parcel}/${row.parcels}` : '—'}
+        </TableCell>
+
+        <TableCell>{row.parcel_value != null ? fCurrency(row.parcel_value) : '—'}</TableCell>
+
         <TableCell>{row.transaction_date ? fDate(row.transaction_date) : '—'}</TableCell>
 
         <TableCell align="right">

@@ -53,7 +53,7 @@ export function StatementTableRow({ row, onRowClick, onEdit, onDelete }: Stateme
     setOpenPopover(null);
   }, []);
 
-  const status = STATUS_MAP[row.status_id] ?? { label: 'Desconhecido', color: 'default' as const };
+  const status = STATUS_MAP[Number(row.status_id)] ?? { label: 'Desconhecido', color: 'default' as const };
   const monthYear = `${MONTH_NAMES[row.month_reference - 1]}/${row.year_reference}`;
 
   return (
