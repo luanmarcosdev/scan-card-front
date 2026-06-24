@@ -109,7 +109,7 @@ export function StatementFormDialog({
         fd.append('month_reference', String(form.month_reference));
         fd.append('year_reference', String(form.year_reference));
         if (form.total !== '') fd.append('total', String(form.total));
-        selectedFiles.forEach((f) => fd.append('images[]', f));
+        selectedFiles.forEach((f) => fd.append('images', f));
         await createStatementRequest(token!, cardId, fd);
       }
       onSuccess();
