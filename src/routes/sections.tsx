@@ -21,7 +21,6 @@ export const FaturasPage = lazy(() => import('src/pages/faturas'));
 export const ExpenseCategoriesPage = lazy(() => import('src/pages/expense-categories'));
 export const SignInPage = lazy(() => import('src/pages/sign-in'));
 export const SignUpPage = lazy(() => import('src/pages/sign-up'));
-export const ProductsPage = lazy(() => import('src/pages/products'));
 export const Page404 = lazy(() => import('src/pages/page-not-found'));
 
 const renderFallback = () => (
@@ -58,7 +57,6 @@ export const routesSection: RouteObject[] = [
     children: [
       { index: true, element: <DashboardPage /> },
       { path: 'cards', element: <UserPage /> },
-      { path: 'products', element: <ProductsPage /> },
       { path: 'blog', element: <BlogPage /> },
       { path: 'account', element: <AccountPage /> },
       { path: 'faturas', element: <FaturasPage /> },
