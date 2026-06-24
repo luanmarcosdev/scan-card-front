@@ -18,17 +18,17 @@ export const navData = [
     icon: icon('ic-analytics'),
   },
   {
-    title: 'Cartoes',
+    title: 'Gerenciar Cartões',
     path: '/cards',
     icon: icon('ic-user'),
   },
   {
-    title: 'Faturas',
+    title: 'Gerenciar Faturas',
     path: '/faturas',
     icon: icon('ic-cart'),
   },
   {
-    title: 'Categorias',
+    title: 'Gerenciar Categorias',
     path: '/expense-categories',
     icon: icon('ic-blog'),
   },
