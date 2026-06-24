@@ -1,12 +1,6 @@
-const BASE_URL = 'https://api.luanmarcosdev.com.br/api';
+import { handleResponse } from './http';
 
-async function handleResponse<T>(res: Response): Promise<T> {
-  const body = await res.json();
-  if (!res.ok) {
-    throw new Error(body?.message ?? 'Erro inesperado');
-  }
-  return body as T;
-}
+const BASE_URL = 'https://api.luanmarcosdev.com.br/api';
 
 // ----------------------------------------------------------------------
 

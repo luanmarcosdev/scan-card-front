@@ -77,6 +77,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     navigate('/sign-in');
   }, [navigate]);
 
+  useEffect(() => {
+    window.addEventListener('auth:unauthorized', logout);
+    return () => window.removeEventListener('auth:unauthorized', logout);
+  }, [logout]);
+
   const updateProfile = useCallback(
     async (payload: UpdateProfilePayload) => {
       const updated = await updateProfileRequest(token!, payload);
