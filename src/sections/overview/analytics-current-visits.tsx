@@ -15,6 +15,7 @@ import { Chart, useChart, ChartLegends } from 'src/components/chart';
 type Props = CardProps & {
   title?: string;
   subheader?: string;
+  action?: React.ReactNode;
   chart: {
     colors?: string[];
     series: {
@@ -25,7 +26,7 @@ type Props = CardProps & {
   };
 };
 
-export function AnalyticsCurrentVisits({ title, subheader, chart, sx, ...other }: Props) {
+export function AnalyticsCurrentVisits({ title, subheader, action, chart, sx, ...other }: Props) {
   const theme = useTheme();
 
   const chartSeries = chart.series.map((item) => item.value);
@@ -55,7 +56,7 @@ export function AnalyticsCurrentVisits({ title, subheader, chart, sx, ...other }
 
   return (
     <Card sx={sx} {...other}>
-      <CardHeader title={title} subheader={subheader} />
+      <CardHeader title={title} subheader={subheader} action={action} />
 
       <Chart
         type="pie"

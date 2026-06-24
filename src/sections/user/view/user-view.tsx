@@ -3,8 +3,14 @@ import type { Card } from 'src/services/cards.service';
 import { useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
+import Button from '@mui/material/Button';
+import Dialog from '@mui/material/Dialog';
 import Typography from '@mui/material/Typography';
+import DialogTitle from '@mui/material/DialogTitle';
+import DialogActions from '@mui/material/DialogActions';
+import DialogContent from '@mui/material/DialogContent';
 import CircularProgress from '@mui/material/CircularProgress';
+import DialogContentText from '@mui/material/DialogContentText';
 
 import { useAuth } from 'src/auth';
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -23,6 +29,8 @@ export function UserView() {
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingCard, setEditingCard] = useState<Card | null>(null);
+  const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const fetchCards = useCallback(async () => {
     setLoading(true);
@@ -43,13 +51,17 @@ export function UserView() {
     setDialogOpen(true);
   }, []);
 
-  const handleDelete = useCallback(
-    async (id: string) => {
-      await deleteCardRequest(token!, id);
+  const handleConfirmDelete = useCallback(async () => {
+    if (!confirmDeleteId) return;
+    setDeleting(true);
+    try {
+      await deleteCardRequest(token!, confirmDeleteId);
+      setConfirmDeleteId(null);
       fetchCards();
-    },
-    [token, fetchCards]
-  );
+    } finally {
+      setDeleting(false);
+    }
+  }, [confirmDeleteId, token, fetchCards]);
 
   const handleOpenCreate = useCallback(() => {
     setEditingCard(null);
@@ -78,7 +90,7 @@ export function UserView() {
               key={card.id}
               card={card}
               onEdit={() => handleEdit(card)}
-              onDelete={() => handleDelete(card.id)}
+              onDelete={() => setConfirmDeleteId(card.id)}
             />
           ))}
           <CardAddItem onClick={handleOpenCreate} />
@@ -91,6 +103,23 @@ export function UserView() {
         onClose={() => setDialogOpen(false)}
         onSuccess={handleDialogSuccess}
       />
+
+      <Dialog open={!!confirmDeleteId} onClose={() => setConfirmDeleteId(null)}>
+        <DialogTitle>Confirmar exclusão</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Tem certeza que deseja excluir este cartão? Esta ação não poderá ser desfeita.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmDeleteId(null)} color="inherit">
+            Cancelar
+          </Button>
+          <Button onClick={handleConfirmDelete} color="error" disabled={deleting}>
+            {deleting ? 'Excluindo...' : 'Excluir'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </DashboardContent>
   );
 }

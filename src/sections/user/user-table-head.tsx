@@ -17,6 +17,7 @@ type UserTableHeadProps = {
   onSort: (id: string) => void;
   headLabel: Record<string, any>[];
   onSelectAllRows: (checked: boolean) => void;
+  showCheckbox?: boolean;
 };
 
 export function UserTableHead({
@@ -27,19 +28,22 @@ export function UserTableHead({
   headLabel,
   numSelected,
   onSelectAllRows,
+  showCheckbox = true,
 }: UserTableHeadProps) {
   return (
     <TableHead>
       <TableRow>
-        <TableCell padding="checkbox">
-          <Checkbox
-            indeterminate={numSelected > 0 && numSelected < rowCount}
-            checked={rowCount > 0 && numSelected === rowCount}
-            onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-              onSelectAllRows(event.target.checked)
-            }
-          />
-        </TableCell>
+        {showCheckbox && (
+          <TableCell padding="checkbox">
+            <Checkbox
+              indeterminate={numSelected > 0 && numSelected < rowCount}
+              checked={rowCount > 0 && numSelected === rowCount}
+              onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
+                onSelectAllRows(event.target.checked)
+              }
+            />
+          </TableCell>
+        )}
 
         {headLabel.map((headCell) => (
           <TableCell

@@ -1,5 +1,8 @@
 import Grid from '@mui/material/Grid';
+import Button from '@mui/material/Button';
 import Typography from '@mui/material/Typography';
+
+import { RouterLink } from 'src/routes/components';
 
 import { _posts } from 'src/_mock';
 import { useAuth } from 'src/auth';
@@ -79,6 +82,16 @@ export function OverviewAnalyticsView() {
         <Grid size={{ xs: 12, md: 6, lg: 4 }}>
           <AnalyticsCurrentVisits
             title="Gastos por categoria"
+            action={
+              <Button
+                component={RouterLink}
+                href="/expense-categories"
+                size="small"
+                color="inherit"
+              >
+                Gerenciar
+              </Button>
+            }
             chart={{
               series: [
                 { label: 'Categoria 1', value: 3500 },
