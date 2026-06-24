@@ -20,7 +20,7 @@ export const navData = [
   },
   {
     title: 'Cartoes',
-    path: '/user',
+    path: '/cards',
     icon: icon('ic-user'),
   },
   {
