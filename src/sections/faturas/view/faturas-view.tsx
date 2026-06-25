@@ -164,7 +164,7 @@ export function FaturasView() {
           </Tabs>
 
           <Card>
-            <TableContainer sx={{ overflow: 'unset' }}>
+            <TableContainer>
               <Table sx={{ minWidth: 500 }}>
                 <UserTableHead
                   order="asc"
@@ -198,7 +198,11 @@ export function FaturasView() {
                   />
 
                   {!loadingStatements && statements.length === 0 && (
-                    <TableNoData searchQuery="" />
+                    <TableNoData
+                      searchQuery=""
+                      title="Nenhuma fatura cadastrada"
+                      description='Clique em "Nova fatura" para criar a primeira fatura deste cartão.'
+                    />
                   )}
                 </TableBody>
               </Table>

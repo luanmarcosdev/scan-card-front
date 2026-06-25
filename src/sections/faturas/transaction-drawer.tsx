@@ -281,7 +281,11 @@ export function TransactionDrawer({
                   />
 
                   {!loading && transactions.length === 0 && (
-                    <TableNoData searchQuery="" />
+                    <TableNoData
+                      searchQuery=""
+                      title="Nenhuma transação encontrada"
+                      description='Clique em "Nova" para adicionar uma transação.'
+                    />
                   )}
                 </TableBody>
               </Table>

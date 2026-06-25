@@ -154,7 +154,7 @@ export function ExpenseCategoriesView() {
           placeholder="Buscar categoria..."
         />
 
-        <TableContainer sx={{ overflow: 'unset' }}>
+        <TableContainer>
           <Table sx={{ minWidth: 500 }}>
             <UserTableHead
               order={order}
@@ -184,6 +184,14 @@ export function ExpenseCategoriesView() {
                 height={68}
                 emptyRows={emptyRows(page, rowsPerPage, categories.length)}
               />
+
+              {!loading && categories.length === 0 && (
+                <TableNoData
+                  searchQuery=""
+                  title="Nenhuma categoria cadastrada"
+                  description='Clique em "Nova categoria" para criar sua primeira categoria de gastos.'
+                />
+              )}
 
               {notFound && <TableNoData searchQuery={filterName} />}
             </TableBody>
