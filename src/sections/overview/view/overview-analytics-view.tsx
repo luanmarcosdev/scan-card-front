@@ -2,10 +2,14 @@ import { Icon } from '@iconify/react';
 import { useState, useEffect, useCallback } from 'react';
 
 import Grid from '@mui/material/Grid';
+import Link from '@mui/material/Link';
+import Alert from '@mui/material/Alert';
 import Stack from '@mui/material/Stack';
 import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
+
+import { RouterLink } from 'src/routes/components';
 
 import { useAuth } from 'src/auth';
 import { DashboardContent } from 'src/layouts/dashboard';
@@ -72,6 +76,7 @@ export function OverviewAnalyticsView() {
   const [cardId, setCardId] = useState<string>('');
   const [cards, setCards] = useState<Card[]>([]);
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
+  const [loading, setLoading] = useState(true);
   const [dialog, setDialog] = useState<DetailDialog | null>(null);
 
   useEffect(() => {
@@ -81,6 +86,7 @@ export function OverviewAnalyticsView() {
 
   const fetchAnalytics = useCallback(async () => {
     if (!token) return;
+    setLoading(true);
     try {
       const data = await getAnalyticsRequest(token, {
         month,
@@ -90,6 +96,8 @@ export function OverviewAnalyticsView() {
       setAnalytics(data);
     } catch {
       setAnalytics(null);
+    } finally {
+      setLoading(false);
     }
   }, [token, month, year, cardId]);
 
@@ -214,6 +222,27 @@ export function OverviewAnalyticsView() {
           </Select>
         </Stack>
       </Stack>
+
+      {!loading && analytics !== null && (analytics.general.statements_count === 0) && (
+        <Alert
+          severity="warning"
+          variant="filled"
+          icon={<Icon icon="solar:calendar-search-bold-duotone" width={28} />}
+          sx={{ mb: 3, py: 2, fontSize: 15, alignItems: 'center' }}
+        >
+          Nenhuma fatura ou gasto encontrado para o período selecionado.{' '}
+          <Link
+            component={RouterLink}
+            href="/faturas"
+            color="inherit"
+            fontWeight="bold"
+            sx={{ textDecorationColor: 'currentColor' }}
+          >
+            Cadastre uma fatura
+          </Link>{' '}
+          ou escolha outro período.
+        </Alert>
+      )}
 
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
