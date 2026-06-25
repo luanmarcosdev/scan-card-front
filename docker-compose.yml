@@ -1,0 +1,7 @@
+services:
+  front-scan-card:
+    build: .
+    container_name: front-scan-card
+    ports:
+      - "3039:3039"
+    restart: unless-stopped
