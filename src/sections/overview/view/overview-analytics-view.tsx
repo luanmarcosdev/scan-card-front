@@ -299,34 +299,30 @@ export function OverviewAnalyticsView() {
           />
         </Grid>
 
-        {hasCategories && (
-          <Grid size={{ xs: 12, md: 6 }}>
-            <AnalyticsCurrentVisits
-              title="Gastos por categoria"
-              subheader={`${transactions?.by_category.length ?? 0} categorias no período`}
-              chart={{ series: categoryPieSeries, options: categoryClickOptions }}
-            />
-          </Grid>
-        )}
+        <Grid size={{ xs: 12, md: 6 }}>
+          <AnalyticsCurrentVisits
+            title="Gastos por categoria"
+            subheader={`${transactions?.by_category.length ?? 0} categorias no período`}
+            chart={{ series: categoryPieSeries, options: categoryClickOptions }}
+          />
+        </Grid>
 
-        {hasCategories && (
-          <Grid size={{ xs: 12, md: 6 }}>
-            <AnalyticsConversionRates
-              title="% do salário por categoria"
-              subheader="Clique em uma categoria para ver as transações"
-              chart={{
-                categories: categorySalaryRatioCategories,
-                series: [
-                  {
-                    name: '% do Salário',
-                    data: (transactions?.by_category ?? []).map((c) => c.salary_ratio),
-                  },
-                ],
-                options: categoryClickOptions,
-              }}
-            />
-          </Grid>
-        )}
+        <Grid size={{ xs: 12, md: 6 }}>
+          <AnalyticsConversionRates
+            title="% do salário por categoria"
+            subheader="Clique em uma categoria para ver as transações"
+            chart={{
+              categories: categorySalaryRatioCategories,
+              series: [
+                {
+                  name: '% do Salário',
+                  data: (transactions?.by_category ?? []).map((c) => c.salary_ratio),
+                },
+              ],
+              options: categoryClickOptions,
+            }}
+          />
+        </Grid>
 
         <Grid size={{ xs: 12, md: 6 }}>
           <AnalyticsWebsiteVisits
