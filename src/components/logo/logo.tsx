@@ -1,5 +1,6 @@
 import type { LinkProps } from '@mui/material/Link';
 
+import { useId } from 'react';
 import { mergeClasses } from 'minimal-shared/utils';
 
 import Link from '@mui/material/Link';
@@ -24,10 +25,12 @@ export function Logo({
   isSingle = true,
   ...other
 }: LogoProps) {
+  const gradientId = useId();
+
   const logo = (
     <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 480 258">
       <defs>
-        <linearGradient id="scGrad" x1="22" y1="0" x2="440" y2="0" gradientUnits="userSpaceOnUse">
+        <linearGradient id={gradientId} x1="22" y1="0" x2="440" y2="0" gradientUnits="userSpaceOnUse">
           <stop offset="0%" stopColor="#1060f0" />
           <stop offset="100%" stopColor="#00d878" />
         </linearGradient>
@@ -36,7 +39,7 @@ export function Logo({
       <path
         d="M 218,44 C 176,28 104,30 68,58 C 32,86 50,124 88,140 C 126,156 194,158 222,186 C 210,212 174,227 130,228 C 96,228 62,214 44,194"
         fill="none"
-        stroke="url(#scGrad)"
+        stroke={`url(#${gradientId})`}
         strokeWidth="40"
         strokeLinecap="round"
       />
@@ -44,7 +47,7 @@ export function Logo({
       <path
         d="M 420,50 C 390,26 334,26 302,56 C 270,86 262,132 271,168 C 280,204 306,226 338,230 C 366,232 402,220 420,196"
         fill="none"
-        stroke="url(#scGrad)"
+        stroke={`url(#${gradientId})`}
         strokeWidth="40"
         strokeLinecap="round"
       />
