@@ -246,7 +246,7 @@ export function OverviewAnalyticsView() {
           />
         </Grid>
 
-        <Grid size={{ xs: 12, md: 4 }}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <AnalyticsCurrentVisits
             title="Salário vs Faturas"
             subheader={`${general?.installments_salary_ratio ?? 0}% do salário comprometido`}
@@ -263,16 +263,17 @@ export function OverviewAnalyticsView() {
         </Grid>
 
         {hasCategories && (
-          <Grid size={{ xs: 12, lg: 5 }}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <AnalyticsCurrentVisits
               title="Gastos por categoria"
+              subheader={`${transactions?.by_category.length ?? 0} categorias no período`}
               chart={{ series: categoryPieSeries, options: categoryClickOptions }}
             />
           </Grid>
         )}
 
         {hasCategories && (
-          <Grid size={{ xs: 12, lg: 7 }}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <AnalyticsConversionRates
               title="% do salário por categoria"
               subheader="Clique em uma categoria para ver as transações"
@@ -290,7 +291,7 @@ export function OverviewAnalyticsView() {
           </Grid>
         )}
 
-        <Grid size={{ xs: 12, md: 8 }}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <AnalyticsWebsiteVisits
             title="Quando as compras finalizam?"
             subheader="Clique em uma barra para ver as transações"
