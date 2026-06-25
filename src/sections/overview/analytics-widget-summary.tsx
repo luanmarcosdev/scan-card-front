@@ -8,7 +8,7 @@ import Box from '@mui/material/Box';
 import Card from '@mui/material/Card';
 import { useTheme } from '@mui/material/styles';
 
-import { fNumber, fPercent, fShortenNumber } from 'src/utils/format-number';
+import { fNumber, fShortenNumber } from 'src/utils/format-number';
 
 import { Iconify } from 'src/components/iconify';
 import { SvgColor } from 'src/components/svg-color';
@@ -19,7 +19,7 @@ import { Chart, useChart } from 'src/components/chart';
 type Props = CardProps & {
   title: string;
   total: number;
-  percent: number;
+  percent?: number;
   color?: PaletteColorKey;
   icon: React.ReactNode;
   chart: {
@@ -64,24 +64,24 @@ export function AnalyticsWidgetSummary({
     ...chart.options,
   });
 
-  const renderTrending = () => (
-    <Box
-      sx={{
-        top: 16,
-        gap: 0.5,
-        right: 16,
-        display: 'flex',
-        position: 'absolute',
-        alignItems: 'center',
-      }}
-    >
-      <Iconify width={20} icon={percent < 0 ? 'eva:trending-down-fill' : 'eva:trending-up-fill'} />
-      <Box component="span" sx={{ typography: 'subtitle2' }}>
-        {percent > 0 && '+'}
-        {fPercent(percent)}
+  const renderTrending = () =>
+    percent !== undefined ? (
+      <Box
+        sx={{
+          top: 16,
+          gap: 0.5,
+          right: 16,
+          display: 'flex',
+          position: 'absolute',
+          alignItems: 'center',
+        }}
+      >
+        <Iconify
+          width={20}
+          icon={percent < 0 ? 'eva:trending-down-fill' : 'eva:trending-up-fill'}
+        />
       </Box>
-    </Box>
-  );
+    ) : null;
 
   return (
     <Card

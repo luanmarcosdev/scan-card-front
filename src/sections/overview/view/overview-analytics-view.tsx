@@ -1,166 +1,326 @@
+import { Icon } from '@iconify/react';
+import { useState, useEffect, useCallback } from 'react';
+
 import Grid from '@mui/material/Grid';
-import Button from '@mui/material/Button';
+import Stack from '@mui/material/Stack';
+import Select from '@mui/material/Select';
+import MenuItem from '@mui/material/MenuItem';
 import Typography from '@mui/material/Typography';
 
-import { RouterLink } from 'src/routes/components';
-
-import { _posts } from 'src/_mock';
 import { useAuth } from 'src/auth';
 import { DashboardContent } from 'src/layouts/dashboard';
+import { type Card, getCardsRequest } from 'src/services/cards.service';
+import { type AnalyticsData, getAnalyticsRequest } from 'src/services/analytics.service';
 
-import { AnalyticsNews } from '../analytics-news';
+import { AnalyticsDetailDialog } from '../analytics-detail-dialog';
 import { AnalyticsCurrentVisits } from '../analytics-current-visits';
 import { AnalyticsWebsiteVisits } from '../analytics-website-visits';
+import { AnalyticsWidgetSummary } from '../analytics-widget-summary';
+import { AnalyticsConversionRates } from '../analytics-conversion-rates';
+
+// ----------------------------------------------------------------------
+
+const MONTH_NAMES = [
+  'Janeiro',
+  'Fevereiro',
+  'Março',
+  'Abril',
+  'Maio',
+  'Junho',
+  'Julho',
+  'Agosto',
+  'Setembro',
+  'Outubro',
+  'Novembro',
+  'Dezembro',
+];
+
+const CURRENT_YEAR = new Date().getFullYear();
+const YEARS = [CURRENT_YEAR - 2, CURRENT_YEAR - 1, CURRENT_YEAR];
+
+const EMPTY_CHART = { categories: [] as string[], series: [] as number[] };
+
+const VENCIMENTO_TYPES = [
+  'ends_this_month',
+  'ends_next_month',
+  'ends_within_3_months',
+] as const;
+
+const VENCIMENTO_LABELS = ['Esse mês', 'Próximo mês', 'Próximos 3 meses'];
+
+// ----------------------------------------------------------------------
+
+type DetailDialog = {
+  title: string;
+  params: {
+    month?: number;
+    year?: number;
+    card_id?: string;
+    category_id?: string;
+    type?: (typeof VENCIMENTO_TYPES)[number];
+  };
+};
 
 // ----------------------------------------------------------------------
 
 export function OverviewAnalyticsView() {
-  const { user } = useAuth();
+  const { user, token } = useAuth();
+  const now = new Date();
+
+  const [month, setMonth] = useState(now.getMonth() + 1);
+  const [year, setYear] = useState(now.getFullYear());
+  const [cardId, setCardId] = useState<string>('');
+  const [cards, setCards] = useState<Card[]>([]);
+  const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
+  const [dialog, setDialog] = useState<DetailDialog | null>(null);
+
+  useEffect(() => {
+    if (!token) return;
+    getCardsRequest(token).then(setCards).catch(() => {});
+  }, [token]);
+
+  const fetchAnalytics = useCallback(async () => {
+    if (!token) return;
+    try {
+      const data = await getAnalyticsRequest(token, {
+        month,
+        year,
+        ...(cardId ? { card_id: cardId } : {}),
+      });
+      setAnalytics(data);
+    } catch {
+      setAnalytics(null);
+    }
+  }, [token, month, year, cardId]);
+
+  useEffect(() => {
+    fetchAnalytics();
+  }, [fetchAnalytics]);
+
+  const transactions = analytics?.transactions;
+  const purchases = analytics?.purchases;
+
+  const hasTransactions = (transactions?.count ?? 0) > 0;
+  const general = analytics
+    ? {
+        ...analytics.general,
+        total_due: hasTransactions ? analytics.general.total_due : 0,
+        installments_salary_ratio: hasTransactions
+          ? (analytics.general.installments_salary_ratio ?? 0)
+          : 0,
+      }
+    : undefined;
+
+  const hasCategories = (transactions?.by_category.length ?? 0) > 0;
+
+  const categoryPieSeries = (transactions?.by_category ?? []).map((c) => ({
+    label: c.category_name,
+    value: c.total,
+  }));
+
+  const categorySalaryRatioCategories = (transactions?.by_category ?? []).map(
+    (c) => c.category_name
+  );
+
+  const baseParams = {
+    month,
+    year,
+    ...(cardId ? { card_id: cardId } : {}),
+  };
+
+  const handleCategoryClick = useCallback(
+    (_: unknown, __: unknown, config: { dataPointIndex: number }) => {
+      const category = transactions?.by_category[config.dataPointIndex];
+      if (!category) return;
+      setDialog({
+        title: category.category_name,
+        params: { ...baseParams, category_id: category.category_id },
+      });
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [transactions, month, year, cardId]
+  );
+
+  const handleVencimentoClick = useCallback(
+    (_: unknown, __: unknown, config: { dataPointIndex: number }) => {
+      const type = VENCIMENTO_TYPES[config.dataPointIndex];
+      if (!type) return;
+      setDialog({
+        title: `Compras — ${VENCIMENTO_LABELS[config.dataPointIndex]}`,
+        params: { ...baseParams, type },
+      });
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [month, year, cardId]
+  );
+
+  const categoryClickOptions = {
+    chart: { events: { dataPointSelection: handleCategoryClick } },
+  };
+
+  const vencimentoClickOptions = {
+    chart: { events: { dataPointSelection: handleVencimentoClick } },
+  };
 
   return (
     <DashboardContent maxWidth="xl">
-      <Typography variant="h4" sx={{ mb: { xs: 3, md: 5 } }}>
-        Olá, {user?.name}
-      </Typography>
+      <Stack
+        direction="row"
+        alignItems="center"
+        justifyContent="space-between"
+        sx={{ mb: { xs: 3, md: 5 } }}
+      >
+        <Typography variant="h4">Olá, {user?.name}</Typography>
+
+        <Stack direction="row" spacing={1}>
+          {cards.length > 0 && (
+            <Select
+              size="small"
+              value={cardId}
+              onChange={(e) => setCardId(e.target.value)}
+              displayEmpty
+            >
+              <MenuItem value="">Todos os cartões</MenuItem>
+              {cards.map((card) => (
+                <MenuItem key={card.id} value={card.id}>
+                  {card.name ?? card.last_numbers}
+                </MenuItem>
+              ))}
+            </Select>
+          )}
+
+          <Select
+            size="small"
+            value={month}
+            onChange={(e) => setMonth(Number(e.target.value))}
+          >
+            {MONTH_NAMES.map((name, i) => (
+              <MenuItem key={i + 1} value={i + 1}>
+                {name}
+              </MenuItem>
+            ))}
+          </Select>
+
+          <Select
+            size="small"
+            value={year}
+            onChange={(e) => setYear(Number(e.target.value))}
+          >
+            {YEARS.map((y) => (
+              <MenuItem key={y} value={y}>
+                {y}
+              </MenuItem>
+            ))}
+          </Select>
+        </Stack>
+      </Stack>
 
       <Grid container spacing={3}>
-        {/* <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+        <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
           <AnalyticsWidgetSummary
-            title="Weekly sales"
-            percent={2.6}
-            total={714000}
-            icon={<img alt="Weekly sales" src="/assets/icons/glass/ic-glass-bag.svg" />}
-            chart={{
-              categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
-              series: [22, 8, 35, 50, 82, 84, 77, 12],
-            }}
+            title="Total a pagar (R$)"
+            total={general?.total_due ?? 0}
+            color="primary"
+            icon={<Icon icon="solar:wallet-money-bold-duotone" width={48} />}
+            chart={EMPTY_CHART}
           />
         </Grid>
 
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+        <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
           <AnalyticsWidgetSummary
-            title="New users"
-            percent={-0.1}
-            total={1352831}
-            color="secondary"
-            icon={<img alt="New users" src="/assets/icons/glass/ic-glass-users.svg" />}
-            chart={{
-              categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
-              series: [56, 47, 40, 62, 73, 30, 23, 54],
-            }}
+            title="Valor médio por compra (R$)"
+            total={transactions?.avg_value ?? 0}
+            color="info"
+            icon={<Icon icon="solar:graph-up-bold-duotone" width={48} />}
+            chart={EMPTY_CHART}
           />
         </Grid>
 
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+        <Grid size={{ xs: 12, sm: 6, lg: 4 }}>
           <AnalyticsWidgetSummary
-            title="Purchase orders"
-            percent={2.8}
-            total={1723315}
+            title="Transações"
+            total={transactions?.count ?? 0}
             color="warning"
-            icon={<img alt="Purchase orders" src="/assets/icons/glass/ic-glass-buy.svg" />}
-            chart={{
-              categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
-              series: [40, 70, 50, 28, 70, 75, 7, 64],
-            }}
+            icon={<Icon icon="solar:transfer-horizontal-bold-duotone" width={48} />}
+            chart={EMPTY_CHART}
           />
         </Grid>
 
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <AnalyticsWidgetSummary
-            title="Messages"
-            percent={3.6}
-            total={234}
-            color="error"
-            icon={<img alt="Messages" src="/assets/icons/glass/ic-glass-message.svg" />}
-            chart={{
-              categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
-              series: [56, 30, 23, 54, 47, 40, 62, 73],
-            }}
-          />
-        </Grid> */}
-
-        <Grid size={{ xs: 12, md: 6, lg: 4 }}>
+        <Grid size={{ xs: 12, md: 4 }}>
           <AnalyticsCurrentVisits
-            title="Gastos por categoria"
-            action={
-              <Button
-                component={RouterLink}
-                href="/expense-categories"
-                size="small"
-                color="inherit"
-              >
-                Gerenciar
-              </Button>
-            }
+            title="Salário vs Faturas"
+            subheader={`${general?.installments_salary_ratio ?? 0}% do salário comprometido`}
             chart={{
               series: [
-                { label: 'Categoria 1', value: 3500 },
-                { label: 'Categoria 2', value: 2500 },
-                { label: 'Categoria 3', value: 1500 },
-                { label: 'Categoria 4', value: 500 },
+                { label: 'Em faturas', value: general?.total_installments ?? 0 },
+                {
+                  label: 'Disponível',
+                  value: Math.max(0, (general?.salary ?? 0) - (general?.total_installments ?? 0)),
+                },
               ],
             }}
           />
         </Grid>
 
-        <Grid size={{ xs: 12, md: 6, lg: 8 }}>
+        {hasCategories && (
+          <Grid size={{ xs: 12, lg: 5 }}>
+            <AnalyticsCurrentVisits
+              title="Gastos por categoria"
+              chart={{ series: categoryPieSeries, options: categoryClickOptions }}
+            />
+          </Grid>
+        )}
+
+        {hasCategories && (
+          <Grid size={{ xs: 12, lg: 7 }}>
+            <AnalyticsConversionRates
+              title="% do salário por categoria"
+              subheader="Clique em uma categoria para ver as transações"
+              chart={{
+                categories: categorySalaryRatioCategories,
+                series: [
+                  {
+                    name: '% do Salário',
+                    data: (transactions?.by_category ?? []).map((c) => c.salary_ratio),
+                  },
+                ],
+                options: categoryClickOptions,
+              }}
+            />
+          </Grid>
+        )}
+
+        <Grid size={{ xs: 12, md: 8 }}>
           <AnalyticsWebsiteVisits
-            title="Gastos por mês"
-            subheader="(+43%) que o ultimo mês"
+            title="Quando as compras finalizam?"
+            subheader="Clique em uma barra para ver as transações"
             chart={{
-              categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+              categories: VENCIMENTO_LABELS,
               series: [
-                { name: 'Visa - 6161', data: [43, 33, 22, 37, 67, 68, 37, 24, 55] },
-                { name: 'Mercado Pago - 0991', data: [51, 70, 47, 67, 40, 37, 24, 70, 24] },
+                {
+                  name: 'Total (R$)',
+                  data: [
+                    purchases?.ends_this_month.total ?? 0,
+                    purchases?.ends_next_month.total ?? 0,
+                    purchases?.ends_within_3_months.total ?? 0,
+                  ],
+                },
               ],
+              options: vencimentoClickOptions,
             }}
           />
         </Grid>
-
-        {/* <Grid size={{ xs: 12, md: 6, lg: 8 }}>
-          <AnalyticsConversionRates
-            title="Conversion rates"
-            subheader="(+43%) que o ultimo mês"
-            chart={{
-              categories: ['Italy', 'Japan', 'China', 'Canada', 'France'],
-              series: [
-                { name: '2022', data: [44, 55, 41, 64, 22] },
-                { name: '2023', data: [53, 32, 33, 52, 13] },
-              ],
-            }}
-          />
-        </Grid> */}
-
-        {/* <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-          <AnalyticsCurrentSubject
-            title="Current subject"
-            chart={{
-              categories: ['English', 'History', 'Physics', 'Geography', 'Chinese', 'Math'],
-              series: [
-                { name: 'Series 1', data: [80, 50, 30, 40, 100, 20] },
-                { name: 'Series 2', data: [20, 30, 40, 80, 20, 80] },
-                { name: 'Series 3', data: [44, 76, 78, 13, 43, 10] },
-              ],
-            }}
-          />
-        </Grid> */}
-
-        <Grid size={{ xs: 12 }}>
-          <AnalyticsNews title="Destaques" list={_posts.slice(0, 5)} />
-        </Grid>
-
-        {/* <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-          <AnalyticsOrderTimeline title="Order timeline" list={_timeline} />
-        </Grid> */}
-
-        {/* <Grid size={{ xs: 12, md: 6, lg: 4 }}>
-          <AnalyticsTrafficBySite title="Traffic by site" list={_traffic} />
-        </Grid> */}
-
-        {/* <Grid size={{ xs: 12, md: 6, lg: 8 }}>
-          <AnalyticsTasks title="Tasks" list={_tasks} />
-        </Grid> */}
       </Grid>
+
+      {dialog && token && (
+        <AnalyticsDetailDialog
+          open
+          title={dialog.title}
+          token={token}
+          params={dialog.params}
+          onClose={() => setDialog(null)}
+        />
+      )}
     </DashboardContent>
   );
 }
