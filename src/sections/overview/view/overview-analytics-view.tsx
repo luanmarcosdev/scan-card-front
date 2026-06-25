@@ -21,6 +21,7 @@ import { AnalyticsCurrentVisits } from '../analytics-current-visits';
 import { AnalyticsWebsiteVisits } from '../analytics-website-visits';
 import { AnalyticsWidgetSummary } from '../analytics-widget-summary';
 import { AnalyticsConversionRates } from '../analytics-conversion-rates';
+import { AnalyticsOnboardingModal } from '../analytics-onboarding-modal';
 
 // ----------------------------------------------------------------------
 
@@ -78,10 +79,16 @@ export function OverviewAnalyticsView() {
   const [analytics, setAnalytics] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [dialog, setDialog] = useState<DetailDialog | null>(null);
+  const [onboardingOpen, setOnboardingOpen] = useState(false);
 
   useEffect(() => {
     if (!token) return;
-    getCardsRequest(token).then(setCards).catch(() => {});
+    getCardsRequest(token)
+      .then((data) => {
+        setCards(data);
+        if (data.length === 0) setOnboardingOpen(true);
+      })
+      .catch(() => {});
   }, [token]);
 
   const fetchAnalytics = useCallback(async () => {
@@ -341,6 +348,11 @@ export function OverviewAnalyticsView() {
           />
         </Grid>
       </Grid>
+
+      <AnalyticsOnboardingModal
+        open={onboardingOpen}
+        onClose={() => setOnboardingOpen(false)}
+      />
 
       {dialog && token && (
         <AnalyticsDetailDialog

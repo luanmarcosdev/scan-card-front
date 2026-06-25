@@ -5,7 +5,10 @@ import { useBoolean } from 'minimal-shared/hooks';
 
 import Box from '@mui/material/Box';
 import Alert from '@mui/material/Alert';
+import Button from '@mui/material/Button';
 import { useTheme } from '@mui/material/styles';
+
+import { AnalyticsOnboardingModal } from 'src/sections/overview/analytics-onboarding-modal';
 
 import { NavMobile, NavDesktop } from './nav';
 import { layoutClasses } from '../core/classes';
@@ -46,6 +49,7 @@ export function DashboardLayout({
   const theme = useTheme();
 
   const { value: open, onFalse: onClose, onTrue: onOpen } = useBoolean();
+  const { value: onboardingOpen, onFalse: onOnboardingClose, onTrue: onOnboardingOpen } = useBoolean();
 
   const renderHeader = () => {
     const headerSlotProps: HeaderSectionProps['slotProps'] = {
@@ -81,6 +85,15 @@ export function DashboardLayout({
           {/** @slot Notifications popover */}
           {/* <NotificationsPopover data={_notifications} /> */}
 
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={onOnboardingOpen}
+            sx={{ display: { xs: 'none', sm: 'flex' } }}
+          >
+            Como funciona?
+          </Button>
+
           {/** @slot Theme toggle */}
           <ThemeToggle />
 
@@ -107,7 +120,10 @@ export function DashboardLayout({
   const renderMain = () => <MainSection {...slotProps?.main}>{children}</MainSection>;
 
   return (
-    <LayoutSection
+    <>
+      <AnalyticsOnboardingModal open={onboardingOpen} onClose={onOnboardingClose} />
+
+      <LayoutSection
       /** **************************************
        * @Header
        *************************************** */
@@ -143,5 +159,6 @@ export function DashboardLayout({
     >
       {renderMain()}
     </LayoutSection>
+    </>
   );
 }
