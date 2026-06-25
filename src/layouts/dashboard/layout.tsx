@@ -17,6 +17,7 @@ import { _workspaces } from '../nav-config-workspace';
 import { MenuButton } from '../components/menu-button';
 import { HeaderSection } from '../core/header-section';
 import { LayoutSection } from '../core/layout-section';
+import { ThemeToggle } from '../components/theme-toggle';
 import { AccountPopover } from '../components/account-popover';
 
 import type { MainSectionProps } from '../core/main-section';
@@ -79,6 +80,9 @@ export function DashboardLayout({
 
           {/** @slot Notifications popover */}
           {/* <NotificationsPopover data={_notifications} /> */}
+
+          {/** @slot Theme toggle */}
+          <ThemeToggle />
 
           {/** @slot Account drawer */}
           <AccountPopover data={_account} />
