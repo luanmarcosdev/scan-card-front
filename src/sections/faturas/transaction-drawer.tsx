@@ -5,20 +5,25 @@ import type { ExpenseCategory } from 'src/services/expense-categories.service';
 import { useState, useEffect, useCallback } from 'react';
 
 import Box from '@mui/material/Box';
+import Paper from '@mui/material/Paper';
+import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import Button from '@mui/material/Button';
-import Drawer from '@mui/material/Drawer';
 import Dialog from '@mui/material/Dialog';
 import Divider from '@mui/material/Divider';
 import TableBody from '@mui/material/TableBody';
+import { useTheme } from '@mui/material/styles';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
 import DialogTitle from '@mui/material/DialogTitle';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import TableContainer from '@mui/material/TableContainer';
 import CircularProgress from '@mui/material/CircularProgress';
 import DialogContentText from '@mui/material/DialogContentText';
+
+import { fCurrency } from 'src/utils/format-number';
 
 import { useAuth } from 'src/auth';
 import {
@@ -53,6 +58,59 @@ const HEAD_LABEL = [
   { id: '' },
 ];
 
+function formatDate(dateStr: string | null): string {
+  if (!dateStr) return '—';
+  const [year, month, day] = dateStr.split('-');
+  return `${day}/${month}/${year}`;
+}
+
+// ----------------------------------------------------------------------
+
+type TxCardProps = {
+  tx: Transaction;
+  categories: ExpenseCategory[];
+  onEdit: () => void;
+  onDelete: () => void;
+};
+
+function TransactionCard({ tx, categories, onEdit, onDelete }: TxCardProps) {
+  const category = categories.find((c) => c.id === tx.expense_category_id);
+
+  return (
+    <Paper variant="outlined" sx={{ p: 2, borderRadius: 1.5 }}>
+      <Stack direction="row" justifyContent="space-between" alignItems="flex-start" spacing={1}>
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Typography variant="subtitle2" noWrap>
+            {tx.merchant ?? '—'}
+          </Typography>
+          <Typography variant="caption" color="text.secondary" display="block">
+            {category?.category ?? '—'}
+            {tx.transaction_date ? ` · ${formatDate(tx.transaction_date)}` : ''}
+          </Typography>
+          {tx.parcels > 1 && (
+            <Typography variant="caption" color="text.secondary" display="block">
+              Parcela {tx.current_parcel}/{tx.parcels}
+              {tx.parcel_value != null ? ` · ${fCurrency(tx.parcel_value)}/parc` : ''}
+            </Typography>
+          )}
+        </Box>
+
+        <Stack alignItems="flex-end" spacing={0.5} flexShrink={0}>
+          <Typography variant="subtitle2">{fCurrency(tx.total_value)}</Typography>
+          <Stack direction="row" spacing={0.5}>
+            <IconButton size="small" onClick={onEdit}>
+              <Iconify icon="solar:pen-bold" width={16} />
+            </IconButton>
+            <IconButton size="small" color="error" onClick={onDelete}>
+              <Iconify icon="solar:trash-bin-trash-bold" width={16} />
+            </IconButton>
+          </Stack>
+        </Stack>
+      </Stack>
+    </Paper>
+  );
+}
+
 // ----------------------------------------------------------------------
 
 type TransactionDrawerProps = {
@@ -71,6 +129,8 @@ export function TransactionDrawer({
   onClose,
 }: TransactionDrawerProps) {
   const { token } = useAuth();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(false);
@@ -131,13 +191,16 @@ export function TransactionDrawer({
 
   return (
     <>
-      <Drawer
-        anchor="right"
-        open={open}
-        onClose={onClose}
-        PaperProps={{ sx: { width: { xs: '100%', sm: 560 }, display: 'flex', flexDirection: 'column' } }}
-      >
-        <Box sx={{ px: 3, py: 2.5, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <Dialog open={open} onClose={onClose} fullScreen={isMobile} maxWidth="md" fullWidth>
+        <Box
+          sx={{
+            px: 3,
+            py: 2.5,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
           <Box>
             <Typography variant="h6">Transações</Typography>
             {monthYear && (
@@ -147,7 +210,7 @@ export function TransactionDrawer({
             )}
           </Box>
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Stack direction="row" alignItems="center" spacing={1}>
             <Button
               size="small"
               variant="contained"
@@ -160,16 +223,34 @@ export function TransactionDrawer({
             <IconButton onClick={onClose}>
               <Iconify icon="mingcute:close-line" />
             </IconButton>
-          </Box>
+          </Stack>
         </Box>
 
         <Divider />
 
-        <Box sx={{ flex: 1, overflow: 'auto' }}>
+        <DialogContent sx={{ p: 0, flex: 1, overflowY: 'auto' }}>
           {loading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
               <CircularProgress />
             </Box>
+          ) : isMobile ? (
+            <Stack spacing={1.5} sx={{ p: 2 }}>
+              {transactions.length === 0 ? (
+                <Typography color="text.secondary" textAlign="center" py={4}>
+                  Nenhuma transação encontrada.
+                </Typography>
+              ) : (
+                transactions.map((tx) => (
+                  <TransactionCard
+                    key={tx.id}
+                    tx={tx}
+                    categories={categories}
+                    onEdit={() => handleEdit(tx)}
+                    onDelete={() => setConfirmDeleteId(tx.id)}
+                  />
+                ))
+              )}
+            </Stack>
           ) : (
             <TableContainer>
               <Table size="small">
@@ -206,8 +287,8 @@ export function TransactionDrawer({
               </Table>
             </TableContainer>
           )}
-        </Box>
-      </Drawer>
+        </DialogContent>
+      </Dialog>
 
       {statement && (
         <TransactionFormDialog
