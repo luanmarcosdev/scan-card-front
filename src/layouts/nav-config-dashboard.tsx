@@ -1,8 +1,6 @@
-import { SvgColor } from 'src/components/svg-color';
+import { Icon } from '@iconify/react';
 
 // ----------------------------------------------------------------------
-
-const icon = (name: string) => <SvgColor src={`/assets/icons/navbar/${name}.svg`} />;
 
 export type NavItem = {
   title: string;
@@ -15,21 +13,21 @@ export const navData = [
   {
     title: 'Dashboard',
     path: '/',
-    icon: icon('ic-analytics'),
+    icon: <Icon icon="solar:chart-2-bold-duotone" width={24} />,
   },
   {
     title: 'Gerenciar Cartões',
     path: '/cards',
-    icon: icon('ic-user'),
+    icon: <Icon icon="solar:card-bold-duotone" width={24} />,
   },
   {
     title: 'Gerenciar Faturas',
     path: '/faturas',
-    icon: icon('ic-cart'),
+    icon: <Icon icon="solar:camera-add-bold-duotone" width={24} />,
   },
   {
     title: 'Gerenciar Categorias',
     path: '/expense-categories',
-    icon: icon('ic-blog'),
+    icon: <Icon icon="solar:tag-bold-duotone" width={24} />,
   },
 ];
