@@ -21,13 +21,13 @@ export const navData = [
     icon: <Icon icon="solar:card-bold-duotone" width={24} />,
   },
   {
-    title: 'Gerenciar Faturas',
-    path: '/faturas',
-    icon: <Icon icon="solar:camera-add-bold-duotone" width={24} />,
-  },
-  {
     title: 'Gerenciar Categorias',
     path: '/expense-categories',
     icon: <Icon icon="solar:tag-bold-duotone" width={24} />,
+  },
+  {
+    title: 'Gerenciar Faturas',
+    path: '/faturas',
+    icon: <Icon icon="solar:camera-add-bold-duotone" width={24} />,
   },
 ];
