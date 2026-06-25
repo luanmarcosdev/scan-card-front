@@ -180,14 +180,15 @@ export function OverviewAnalyticsView() {
   return (
     <DashboardContent maxWidth="xl">
       <Stack
-        direction="row"
-        alignItems="center"
+        direction={{ xs: 'column', sm: 'row' }}
+        alignItems={{ xs: 'flex-start', sm: 'center' }}
         justifyContent="space-between"
+        gap={2}
         sx={{ mb: { xs: 3, md: 5 } }}
       >
         <Typography variant="h4">Olá, {user?.name}</Typography>
 
-        <Stack direction="row" spacing={1}>
+        <Stack direction="row" spacing={1} flexWrap="wrap">
           {cards.length > 0 && (
             <Select
               size="small"

@@ -1,12 +1,15 @@
 import type { Breakpoint } from '@mui/material/styles';
 
 import { merge } from 'es-toolkit';
+import { Icon } from '@iconify/react';
 import { useBoolean } from 'minimal-shared/hooks';
 
 import Box from '@mui/material/Box';
 import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
+import Tooltip from '@mui/material/Tooltip';
 import { useTheme } from '@mui/material/styles';
+import IconButton from '@mui/material/IconButton';
 
 import { AnalyticsOnboardingModal } from 'src/sections/overview/analytics-onboarding-modal';
 
@@ -84,6 +87,15 @@ export function DashboardLayout({
 
           {/** @slot Notifications popover */}
           {/* <NotificationsPopover data={_notifications} /> */}
+
+          <Tooltip title="Como funciona?">
+            <IconButton
+              onClick={onOnboardingOpen}
+              sx={{ display: { xs: 'flex', sm: 'none' } }}
+            >
+              <Icon icon="solar:question-circle-bold-duotone" width={24} />
+            </IconButton>
+          </Tooltip>
 
           <Button
             size="small"
